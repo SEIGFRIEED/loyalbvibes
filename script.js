@@ -1107,6 +1107,32 @@ const applyContentState = () => {
   });
 };
 
+const applyContentSaveBarLayout = () => {
+  if (!contentSaveBar || !contentSaveButton) {
+    return;
+  }
+
+  const isCompactLayout = window.innerWidth <= 480;
+
+  Object.assign(contentSaveBar.style, {
+    position: "fixed",
+    right: isCompactLayout ? "12px" : "18px",
+    left: "auto",
+    bottom: isCompactLayout ? "12px" : "18px",
+    zIndex: "70",
+    display: "grid",
+    gridTemplateColumns: isCompactLayout ? "1fr" : "minmax(0, 1fr) auto",
+    alignItems: "center",
+    gap: "14px",
+    width: isCompactLayout ? "min(360px, calc(100vw - 24px))" : "min(460px, calc(100vw - 24px))",
+    padding: "14px 16px",
+    boxSizing: "border-box",
+  });
+
+  contentSaveButton.style.width = isCompactLayout ? "100%" : "auto";
+  contentSaveButton.style.whiteSpace = "nowrap";
+};
+
 const getEditableResolvedValue = (element) => {
   const key = element.dataset.editableKey;
   return getEditableValue(element) || defaultContent[key];
@@ -2144,6 +2170,10 @@ contentSaveButton?.addEventListener("click", () => {
   savePendingContentChanges();
 });
 
+window.addEventListener("resize", () => {
+  applyContentSaveBarLayout();
+});
+
 window.addEventListener("beforeunload", (event) => {
   if (contentEditorState.pendingKeys.size === 0) {
     return;
@@ -2682,6 +2712,7 @@ if (
 
 attachEditableListeners();
 applyContentState();
+applyContentSaveBarLayout();
 applyAuthUi();
 resetProductForm();
 observeRevealTargets();
