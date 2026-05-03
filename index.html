@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOYALTYVIBESFOREVER</title>
+  <meta
+    name="description"
+    content="LOYALTYVIBESFOREVER. Marca de ropa con estética streetwear contemporánea y catálogo editable."
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <p data-editable-key="topbar-text">NUEVO DROP DISPONIBLE AHORA</p>
+  </div>
+
+  <header class="site-header">
+    <div class="shell header-grid">
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Abrir menú principal"
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+        <div class="nav-item has-panel">
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            Tienda
+            <span class="caret" aria-hidden="true"></span>
+          </button>
+          <div class="mega-panel" role="menu">
+            <a href="tienda.html#catalogo-tshirts" role="menuitem">T-shirts</a>
+            <a href="tienda.html#catalogo-hoodies" role="menuitem">Hoodies</a>
+            <a href="tienda.html#catalogo-pantalones" role="menuitem">Pantalones</a>
+            <a href="tienda.html#catalogo-accesorios" role="menuitem">Accesorios</a>
+            <a href="tienda.html" role="menuitem">Ver todo</a>
+          </div>
+        </div>
+
+        <a class="nav-link" href="#lo-nuevo">Lo nuevo</a>
+        <a class="nav-link" href="#nuestro-equipo">Nuestro equipo</a>
+
+        <div class="nav-item has-panel">
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            Contacto
+            <span class="caret" aria-hidden="true"></span>
+          </button>
+          <div class="mega-panel panel-contact" role="menu">
+            <a href="#contacto" role="menuitem">Escríbenos</a>
+            <a href="https://www.instagram.com/loyaltyvibess/" role="menuitem" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="#contacto" role="menuitem">Atención al cliente</a>
+          </div>
+        </div>
+      </nav>
+
+      <a class="brand brand-logo" href="#inicio" aria-label="Ir al inicio de LOYALTYVIBESFOREVER">
+        <img src="assets/lvf.png" alt="Logo de LOYALTYVIBESFOREVER">
+      </a>
+
+      <div class="header-actions" aria-label="Acciones rápidas">
+        <button class="icon-button search-button" type="button" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M20 20L16.65 16.65"></path>
+          </svg>
+        </button>
+
+        <div class="account-wrapper">
+          <button
+            class="icon-button account-button"
+            type="button"
+            aria-label="Cuenta"
+            aria-expanded="false"
+            aria-controls="account-menu"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.4"></circle>
+              <path d="M4.8 19.2C5.9 15.9 8.5 14.2 12 14.2C15.5 14.2 18.1 15.9 19.2 19.2"></path>
+            </svg>
+          </button>
+
+          <div class="account-menu" id="account-menu" hidden>
+            <p class="account-menu-label" id="account-menu-label">Accede a tu cuenta</p>
+            <button class="account-menu-action" type="button" data-auth-open="cliente">
+              Iniciar sesión como cliente
+            </button>
+            <button class="account-menu-action" type="button" data-auth-open="partner">
+              Iniciar sesión como partner
+            </button>
+            <button class="account-menu-action" type="button" data-open-product-modal hidden>
+              Gestionar catálogo
+            </button>
+            <button class="account-menu-action account-menu-logout" type="button" data-account-logout hidden>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <button class="icon-button bag-button" type="button" aria-label="Abrir bolsa" data-open-checkout>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 8H17L16.2 19H7.8L7 8Z"></path>
+            <path d="M9 8V6.9C9 5.3 10.3 4 12 4C13.7 4 15 5.3 15 6.9V8"></path>
+          </svg>
+          <span class="bag-count" data-bag-count hidden>0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="team-hero" id="nuestro-equipo">
+      <div class="shell">
+        <div class="hero-media" data-reveal>
+          <div class="video-container">
+            <video src="assets/render_1.mp4" autoplay muted loop playsinline></video>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="catalog catalog-latest" id="lo-nuevo">
+      <div class="shell latest-shell">
+        <div class="section-head latest-head" data-reveal>
+          <div>
+            <p class="section-tag" data-editable-key="catalog-kicker">DROP ACTUAL</p>
+            <h2 data-editable-key="catalog-title">Lo nuevo</h2>
+          </div>
+
+          <div class="latest-head-copy">
+            <p data-editable-key="catalog-copy">
+              Una selección de prendas recién añadidas para quienes quieren entrar primero al
+              siguiente mood de la marca.
+            </p>
+            <a class="inline-link" href="tienda.html" data-editable-key="catalog-link">Ver drop completo</a>
+          </div>
+        </div>
+
+        <div class="filter-bar" data-reveal>
+          <div class="filter-group filter-group-right">
+            <strong data-latest-product-count>4 productos</strong>
+          </div>
+        </div>
+
+        <div class="partner-toolbar" id="partner-toolbar" hidden>
+          <div>
+            <p class="section-tag">Modo partner</p>
+            <h3>Editar textos y catálogo en vivo.</h3>
+            <p>
+              Haz click sobre los textos resaltados para actualizarlos. Los cambios se guardan
+              automáticamente en este navegador.
+            </p>
+          </div>
+          <button class="partner-action" type="button" data-open-product-modal data-default-category="tshirts">
+            Añadir prenda
+          </button>
+        </div>
+
+        <div class="product-grid" id="product-grid"></div>
+
+        <div class="view-all-wrap" data-reveal>
+          <a class="view-all-button" href="tienda.html">Ver todo</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="team-notes">
+      <div class="shell notes-shell">
+        <div class="notes-grid">
+          <article data-reveal>
+            <p class="section-tag" data-editable-key="note-1-tag">DIRECCIÓN</p>
+            <h2 data-editable-key="note-1-title">Minimalismo con identidad real.</h2>
+            <p data-editable-key="note-1-copy" data-multiline="true">
+              Loyalty Vibes Forever no es solo ropa, es una actitud. Cada pieza está pensada
+              para destacar sin ruido, con diseño limpio y presencia fuerte. Aquí lo simple
+              tiene peso.
+            </p>
+          </article>
+
+          <article data-reveal>
+            <p class="section-tag" data-editable-key="note-2-tag">NUESTRO EQUIPO</p>
+            <h2 data-editable-key="note-2-title">Lealtad que se vive, no que se dice.</h2>
+            <p data-editable-key="note-2-copy" data-multiline="true">
+              Nacemos de la calle, de la cultura y de la vibra real. Loyalty vibes never dies
+              representa a los que se mantienen firmes a lo suyo, sin cambiar por moda.
+            </p>
+          </article>
+
+          <article data-reveal>
+            <p class="section-tag" data-editable-key="note-3-tag">ESENCIA</p>
+            <h2 data-editable-key="note-3-title">Preparado para dejar huella.</h2>
+            <p data-editable-key="note-3-copy" data-multiline="true">
+              Cada drop está pensado para trascender. Loyalty Vibes Forever no sigue tendencias,
+              las crea. Esto es cultura, energía y lealtad convertida en piezas que duran.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Se eliminó la sección Newsletter -->
+
+    <section class="contact-section" id="contacto">
+      <div class="shell contact-grid">
+        <div data-reveal>
+          <p class="section-tag" data-editable-key="contact-tag">Contacto</p>
+          <h2 data-editable-key="contact-title">
+            Hablemos de próximos lanzamientos, colaboración o producción de marca.
+          </h2>
+        </div>
+
+        <div class="contact-rail" data-reveal>
+          <div class="contact-list">
+            <a
+              href="mailto:hola@loyaltyvibesforever.com"
+              data-editable-key="contact-email"
+              data-link-kind="email"
+            >
+              hola@loyaltyvibesforever.com
+            </a>
+            <a
+              href="tel:+18095550123"
+              data-editable-key="contact-phone"
+              data-link-kind="phone"
+            >
+              +1 809 555 0123
+            </a>
+            <p data-editable-key="contact-city">Santo Domingo, República Dominicana</p>
+            <p data-editable-key="contact-hours">Compras online y atención por correo</p>
+          </div>
+
+          <div class="contact-tag-wrap" aria-hidden="true">
+            <img class="contact-tag-horizontal" src="assets/tt.png" alt="">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <p>© <span id="current-year"></span> LOYALTYVIBESFOREVER</p>
+      <div class="footer-meta">
+        <div class="footer-links">
+          <a href="#contacto">Contacto</a>
+          <a href="https://www.instagram.com/loyaltyvibess/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="#lo-nuevo">Lo nuevo</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="modal-backdrop" id="auth-modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <button
+        class="modal-close"
+        type="button"
+        data-close-modal="auth-modal"
+        aria-label="Cerrar ventana"
+      >
+        ×
+      </button>
+
+      <p class="section-tag" id="auth-role-label">Cuenta</p>
+      <h2 id="auth-title">Iniciar sesión</h2>
+      <p class="modal-copy" id="auth-copy">Elige cómo quieres entrar en LOYALTYVIBESFOREVER.</p>
+
+      <form class="auth-form" id="auth-form">
+        <label class="auth-field" id="auth-name-field" hidden>
+          Nombre
+          <input type="text" name="name" autocomplete="name">
+        </label>
+
+        <label class="auth-field">
+          Correo
+          <input type="email" name="email" autocomplete="email" required>
+        </label>
+
+        <label class="auth-field">
+          Contraseña
+          <input type="password" name="password" autocomplete="current-password" minlength="4" required>
+        </label>
+
+        <label class="auth-field" id="auth-confirm-field" hidden>
+          Confirmar contraseña
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="4">
+        </label>
+
+        <label class="auth-field" id="auth-code-field" hidden>
+          Codigo de verificacion
+          <input
+            type="text"
+            name="verificationCode"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            minlength="6"
+            maxlength="6"
+            pattern="[0-9]{6}"
+          >
+        </label>
+
+        <button class="primary-button" type="submit" id="auth-submit">Iniciar sesión</button>
+      </form>
+
+      <p class="modal-feedback" id="auth-feedback" aria-live="polite"></p>
+      <p class="auth-helper" id="auth-code-copy" hidden>
+        Solo te pediremos este codigo una vez por cuenta, mientras no borres cookies o historial.
+      </p>
+      <button class="secondary-button auth-resend-button" type="button" id="auth-resend-code" hidden>
+        Reenviar codigo
+      </button>
+      <p class="modal-switch" id="auth-switch-copy">
+        <span id="auth-switch-text">¿No tienes cuenta?</span>
+        <button class="text-button" type="button" id="auth-toggle-mode">Crear cuenta</button>
+      </p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="product-modal" hidden>
+    <div class="modal-card modal-card-wide" role="dialog" aria-modal="true" aria-labelledby="product-title">
+      <button
+        class="modal-close"
+        type="button"
+        data-close-modal="product-modal"
+        aria-label="Cerrar ventana"
+      >
+        ×
+      </button>
+
+      <p class="section-tag">Catálogo partner</p>
+      <h2 id="product-title">Agregar o editar ropa</h2>
+      <p class="modal-copy">
+        Completa los datos de la prenda. También podrás editarla o eliminarla desde cada tarjeta
+        del catálogo.
+      </p>
+
+      <form class="product-form" id="product-form">
+        <input type="hidden" name="productId">
+        <input type="hidden" name="frontImageData">
+        <input type="hidden" name="backImageData">
+
+        <label class="auth-field">
+          Tipo de prenda
+          <select name="category" required>
+            <option value="tshirts">T-shirts</option>
+            <option value="hoodies">Hoodies</option>
+            <option value="pants">Pantalones</option>
+            <option value="accessories">Accesorios</option>
+          </select>
+        </label>
+
+        <label class="auth-field">
+          Estilo visual
+          <select name="visual" required></select>
+        </label>
+
+        <label class="auth-field">
+          Nombre
+          <input type="text" name="name" required>
+        </label>
+
+        <label class="auth-field">
+          Precio
+          <input type="text" name="price" placeholder="RD$ 2,697.68" required>
+        </label>
+
+        <label class="auth-field">
+          Cantidad de stock
+          <input type="number" name="stock" min="0" step="1" value="12" required>
+        </label>
+
+        <label class="auth-field">
+          Texto del diseño
+          <input type="text" name="label" placeholder="LOYALTYVIBESFOREVER">
+        </label>
+
+        <div class="product-image-fields">
+          <label class="auth-field product-image-field">
+            Foto frontal
+            <input type="file" name="frontImage" accept="image/png,image/jpeg,image/webp,image/avif">
+            <span class="product-field-hint">
+              Opcional. Si subes imagen, la tarjeta mostrará esta vista al frente.
+            </span>
+          </label>
+
+          <label class="auth-field product-image-field">
+            Foto trasera
+            <input type="file" name="backImage" accept="image/png,image/jpeg,image/webp,image/avif">
+            <span class="product-field-hint">
+              Opcional. Si subes ambas, la parte trasera aparecerá al pasar el cursor por la tarjeta.
+            </span>
+          </label>
+        </div>
+
+        <div class="product-image-preview-grid" aria-live="polite">
+          <figure class="product-image-preview-card">
+            <span class="product-image-preview-label">Vista frontal</span>
+            <img
+              data-product-image-preview="front"
+              alt="Vista previa frontal de la prenda"
+              hidden
+            >
+            <p class="product-image-preview-empty" data-product-image-empty="front">Sin foto cargada.</p>
+          </figure>
+
+          <figure class="product-image-preview-card">
+            <span class="product-image-preview-label">Vista trasera</span>
+            <img
+              data-product-image-preview="back"
+              alt="Vista previa trasera de la prenda"
+              hidden
+            >
+            <p class="product-image-preview-empty" data-product-image-empty="back">Sin foto cargada.</p>
+          </figure>
+        </div>
+
+        <div class="product-form-actions">
+          <button class="primary-button" type="submit" id="product-submit">Guardar prenda</button>
+          <button class="secondary-button" type="button" id="product-reset">Nueva prenda</button>
+        </div>
+      </form>
+
+
+      <p class="modal-feedback" id="product-feedback" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="quick-view-modal" hidden>
+    <div class="modal-card modal-card-product" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
+      <button
+        class="modal-close"
+        type="button"
+        data-close-modal="quick-view-modal"
+        aria-label="Cerrar ventana"
+      >
+        ×
+      </button>
+
+      <div class="quick-view-layout">
+        <div class="quick-view-media" id="quick-view-media"></div>
+
+        <div class="quick-view-copy-wrap">
+          <p class="section-tag" id="quick-view-category">Producto</p>
+          <h2 id="quick-view-title">Detalle del producto</h2>
+          <p class="quick-view-price" id="quick-view-price">RD$ 0.00</p>
+          <p class="quick-view-stock" id="quick-view-stock">12 disponibles</p>
+          <p class="modal-copy" id="quick-view-copy">
+            Elige la talla y la cantidad para agregar este artículo a tu bolsa.
+          </p>
+
+          <form class="quick-view-form" id="quick-view-form">
+            <input type="hidden" name="productId">
+
+            <label class="auth-field">
+              Talla
+              <select name="size" id="quick-view-size" required></select>
+            </label>
+
+            <label class="auth-field">
+              Cantidad
+              <input type="number" name="quantity" id="quick-view-quantity" min="1" max="10" value="1" required>
+            </label>
+
+            <div class="product-form-actions">
+              <button class="primary-button" type="submit">Agregar artículo</button>
+              <button class="secondary-button" type="button" id="quick-view-checkout">Ir a pagar</button>
+            </div>
+          </form>
+
+          <p class="modal-feedback" id="quick-view-feedback" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="checkout-modal" hidden>
+    <div class="modal-card modal-card-checkout" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+      <button
+        class="modal-close"
+        type="button"
+        data-close-modal="checkout-modal"
+        aria-label="Cerrar ventana"
+      >
+        ×
+      </button>
+
+      <p class="section-tag">Checkout</p>
+      <h2 id="checkout-title">Finalizar compra</h2>
+      <p class="modal-copy">
+        Revisa tu bolsa, completa la dirección de entrega y deja listo el pago.
+      </p>
+
+      <div class="checkout-layout">
+        <section class="checkout-summary" aria-labelledby="checkout-summary-title">
+          <div class="checkout-summary-head">
+            <h3 id="checkout-summary-title">Resumen del pedido</h3>
+            <p class="checkout-count" id="checkout-item-count">0 artículos</p>
+          </div>
+
+          <p class="checkout-empty" id="checkout-empty">
+            Tu bolsa está vacía. Abre un producto y agrega el artículo para continuar.
+          </p>
+
+          <div class="checkout-items" id="checkout-items"></div>
+
+          <div class="checkout-totals">
+            <div>
+              <span>Subtotal</span>
+              <strong id="checkout-subtotal">RD$ 0.00</strong>
+            </div>
+            <div>
+              <span>Envío</span>
+              <strong id="checkout-shipping">RD$ 0.00</strong>
+            </div>
+            <div class="checkout-total">
+              <span>Total</span>
+              <strong id="checkout-total">RD$ 0.00</strong>
+            </div>
+          </div>
+        </section>
+
+        <form class="checkout-form" id="checkout-form">
+          <div class="checkout-form-grid">
+            <label class="auth-field">
+              Nombre completo
+              <input type="text" name="fullName" autocomplete="name" required>
+            </label>
+
+            <label class="auth-field">
+              Correo
+              <input type="email" name="email" autocomplete="email" required>
+            </label>
+
+            <label class="auth-field">
+              Teléfono
+              <input type="tel" name="phone" autocomplete="tel" required>
+            </label>
+
+            <label class="auth-field checkout-field-span">
+              Dirección de entrega
+              <input type="text" name="address" autocomplete="street-address" placeholder="Calle, número, sector" required>
+            </label>
+
+            <label class="auth-field">
+              Ciudad
+              <input type="text" name="city" autocomplete="address-level2" required>
+            </label>
+
+            <label class="auth-field">
+              Código postal
+              <input type="text" name="postalCode" autocomplete="postal-code" required>
+            </label>
+
+            <label class="auth-field">
+              Nombre en la tarjeta
+              <input type="text" name="cardName" autocomplete="cc-name" required>
+            </label>
+
+            <label class="auth-field checkout-field-span">
+              Número de tarjeta
+              <input
+                type="text"
+                name="cardNumber"
+                inputmode="numeric"
+                autocomplete="cc-number"
+                placeholder="1234 5678 9012 3456"
+                required
+              >
+            </label>
+
+            <label class="auth-field">
+              Vencimiento
+              <input type="text" name="expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" required>
+            </label>
+
+            <label class="auth-field">
+              CVV
+              <input type="text" name="cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" required>
+            </label>
+          </div>
+
+          <div class="product-form-actions">
+            <button class="primary-button" type="submit" id="checkout-submit">Pagar pedido</button>
+          </div>
+        </form>
+      </div>
+
+      <p class="modal-feedback" id="checkout-feedback" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
