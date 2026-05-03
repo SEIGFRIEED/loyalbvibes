@@ -7,17 +7,11 @@ const STORAGE_KEYS = {
 };
 const PARTNER_ACCOUNT = {
   name: "Yulibert Andujar",
-  email: "yulibertandujar01@gmail.com",
-  password: "yulibert1305",
+  email: "admin@lvf.com",
+  password: "1010",
   role: "partner",
 };
-const LEGACY_PARTNER_EMAILS = new Set(["yulibertandujar017@gmail.com"]);
-// Reemplaza estos valores con los datos reales de EmailJS para activar el envio del codigo.
-const EMAILJS_CONFIG = {
-  serviceId: "YOUR_EMAILJS_SERVICE_ID",
-  templateId: "YOUR_EMAILJS_TEMPLATE_ID",
-  publicKey: "YOUR_EMAILJS_PUBLIC_KEY",
-};
+const LEGACY_PARTNER_EMAILS = new Set(["yulibertandujar017@gmail.com", "yulibertandujar01@gmail.com"]);
 const STORAGE_BACKUP_PREFIX = "nival-backup";
 const STORAGE_BACKUP_CHUNK_SIZE = 3000;
 const STORAGE_BACKUP_MAX_CHUNKS = 24;
@@ -28,8 +22,6 @@ const PRODUCT_IMAGE_MAX_DIMENSION = 1600;
 const PRODUCT_IMAGE_JPEG_QUALITY = 0.86;
 const CHECKOUT_SHIPPING_FEE = 479.59;
 const DEFAULT_PRODUCT_STOCK = 12;
-const FIRST_LOGIN_CODE_LENGTH = 6;
-const FIRST_LOGIN_CODE_TTL_MS = 10 * 60 * 1000;
 // Tasa de venta del BCRD del 1 de mayo de 2026 para migrar precios legacy en USD a DOP.
 const LEGACY_USD_TO_DOP_RATE = 59.9485;
 const LEGACY_MOCKUP_PRODUCT_IDS = new Set([
@@ -223,9 +215,9 @@ const authSwitchCopy = document.querySelector("#auth-switch-copy");
 const authSwitchText = document.querySelector("#auth-switch-text");
 const authNameField = document.querySelector("#auth-name-field");
 const authConfirmField = document.querySelector("#auth-confirm-field");
-const authCodeField = document.querySelector("#auth-code-field");
-const authCodeCopy = document.querySelector("#auth-code-copy");
-const authResendCode = document.querySelector("#auth-resend-code");
+const contentSaveBar = document.querySelector("#content-save-bar");
+const contentSaveStatus = document.querySelector("#content-save-status");
+const contentSaveButton = document.querySelector("#content-save-button");
 
 const productModal = document.querySelector("#product-modal");
 const productForm = document.querySelector("#product-form");
@@ -281,8 +273,10 @@ const checkoutSubmit = document.querySelector("#checkout-submit");
 const authState = {
   mode: "login",
   role: "cliente",
-  stage: "credentials",
-  pendingVerification: null,
+};
+const contentEditorState = {
+  pendingKeys: new Set(),
+  message: "idle",
 };
 
 let activeCatalogCategory = "all";
@@ -673,15 +667,6 @@ const normalizePartnerEmail = (email) => {
   return LEGACY_PARTNER_EMAILS.has(normalizedEmail) ? PARTNER_ACCOUNT.email : normalizedEmail;
 };
 const isAuthorizedPartnerEmail = (email) => normalizePartnerEmail(email) === PARTNER_ACCOUNT.email;
-const isEmailVerificationConfigured = () =>
-  Object.values(EMAILJS_CONFIG).every(
-    (value) => typeof value === "string" && value && !value.startsWith("YOUR_")
-  );
-const generateVerificationCode = () => {
-  const minimum = 10 ** (FIRST_LOGIN_CODE_LENGTH - 1);
-  const range = 9 * minimum;
-  return String(Math.floor(minimum + Math.random() * range));
-};
 const startSessionForAccount = (account) => {
   state.session = {
     id: account.id,
@@ -695,123 +680,9 @@ const startSessionForAccount = (account) => {
   closeModal(authModal);
   resetAuthFlow();
 };
-const sendFirstLoginCode = async (account, code) => {
-  if (!isEmailVerificationConfigured()) {
-    throw new Error("email_config_missing");
-  }
-
-  const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      service_id: EMAILJS_CONFIG.serviceId,
-      template_id: EMAILJS_CONFIG.templateId,
-      user_id: EMAILJS_CONFIG.publicKey,
-      template_params: {
-        to_email: account.email,
-        account_name: account.name,
-        account_role: roleLabel(account.role),
-        passcode: code,
-        store_name: "LOYALTYVIBESFOREVER",
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("email_send_failed");
-  }
-};
-const beginFirstLoginVerification = async (account) => {
-  const nextCode = generateVerificationCode();
-
-  authFeedback.textContent = "Enviando codigo al correo...";
-  authSubmit.disabled = true;
-  authResendCode?.setAttribute("disabled", "true");
-
-  if (authForm?.elements.verificationCode) {
-    authForm.elements.verificationCode.value = "";
-  }
-
-  try {
-    await sendFirstLoginCode(account, nextCode);
-    authState.pendingVerification = {
-      accountId: account.id,
-      email: account.email,
-      code: nextCode,
-      expiresAt: Date.now() + FIRST_LOGIN_CODE_TTL_MS,
-    };
-    authState.stage = "verification";
-    applyAuthUi();
-    authFeedback.textContent = `Te enviamos un codigo de ${FIRST_LOGIN_CODE_LENGTH} digitos a ${account.email}.`;
-    authForm?.elements.verificationCode?.focus();
-    return true;
-  } catch (error) {
-    authState.pendingVerification = null;
-    authState.stage = "credentials";
-    applyAuthUi();
-    authFeedback.textContent =
-      error.message === "email_config_missing"
-        ? "Falta configurar EmailJS en script.js para poder enviar el codigo al correo."
-        : "No pudimos enviar el codigo ahora mismo. Intenta de nuevo.";
-    return false;
-  } finally {
-    authSubmit.disabled = false;
-    authResendCode?.removeAttribute("disabled");
-  }
-};
-const requiresFirstLoginVerification = (account) => !account.firstLoginVerifiedAt;
-const verifyPendingFirstLoginCode = () => {
-  const pendingVerification = authState.pendingVerification;
-  const submittedCode = String(authForm?.elements.verificationCode?.value || "").replace(/\D/g, "");
-
-  if (!pendingVerification) {
-    authFeedback.textContent = "Primero solicita tu codigo desde el inicio de sesion.";
-    return;
-  }
-
-  if (!submittedCode) {
-    authFeedback.textContent = "Escribe el codigo que te llego al correo.";
-    return;
-  }
-
-  if (Date.now() > pendingVerification.expiresAt) {
-    authFeedback.textContent = "El codigo vencio. Usa el boton de reenviar codigo.";
-    return;
-  }
-
-  if (submittedCode !== pendingVerification.code) {
-    authFeedback.textContent = "El codigo no coincide. Revisa el correo e intenta otra vez.";
-    return;
-  }
-
-  const account = state.accounts.find((entry) => entry.id === pendingVerification.accountId);
-
-  if (!account) {
-    authFeedback.textContent = "No encontramos esta cuenta. Vuelve a iniciar sesion.";
-    return;
-  }
-
-  account.firstLoginVerifiedAt = account.firstLoginVerifiedAt || new Date().toISOString();
-  saveAccounts();
-  startSessionForAccount(account);
-};
 const resetAuthFlow = () => {
-  authState.stage = "credentials";
-  authState.pendingVerification = null;
-
   authForm?.reset();
   authSubmit.disabled = false;
-  authResendCode?.removeAttribute("disabled");
-
-  if (authForm?.elements.email) {
-    authForm.elements.email.readOnly = false;
-  }
-
-  if (authForm?.elements.password) {
-    authForm.elements.password.readOnly = false;
-  }
 
   if (authFeedback) {
     authFeedback.textContent = "";
@@ -1063,10 +934,6 @@ const normalizeAccounts = (accounts) => {
         password: isAuthorizedPartner ? PARTNER_ACCOUNT.password : account.password,
         role: isAuthorizedPartner && account.role === "partner" ? "partner" : "cliente",
         createdAt: account.createdAt || new Date().toISOString(),
-        firstLoginVerifiedAt:
-          typeof account.firstLoginVerifiedAt === "string" && account.firstLoginVerifiedAt
-            ? account.firstLoginVerifiedAt
-            : "",
       };
     });
   const authorizedPartnerAccount = normalizedAccounts.find(
@@ -1088,7 +955,6 @@ const normalizeAccounts = (accounts) => {
       password: PARTNER_ACCOUNT.password,
       role: "partner",
       createdAt: new Date().toISOString(),
-      firstLoginVerifiedAt: "",
     },
   ];
 };
@@ -1236,8 +1102,94 @@ const applyContentState = () => {
     const nextValue = state.content[key] ?? defaultContent[key];
 
     element.textContent = nextValue;
+    element.classList.remove("has-pending-change");
     updateContactLink(element, nextValue);
   });
+};
+
+const getEditableResolvedValue = (element) => {
+  const key = element.dataset.editableKey;
+  return getEditableValue(element) || defaultContent[key];
+};
+
+const updateContentSaveUi = () => {
+  if (!contentSaveBar || !contentSaveStatus || !contentSaveButton) {
+    return;
+  }
+
+  const partnerMode = isPartnerSession();
+  const pendingCount = contentEditorState.pendingKeys.size;
+
+  contentSaveBar.hidden = !partnerMode;
+
+  if (!partnerMode) {
+    contentSaveBar.classList.remove("is-pending");
+    contentSaveStatus.textContent = "Edita cualquier texto y luego pulsa Guardar cambios.";
+    contentSaveButton.disabled = true;
+    return;
+  }
+
+  if (pendingCount > 0) {
+    contentSaveBar.classList.add("is-pending");
+    contentSaveStatus.textContent =
+      pendingCount === 1 ? "Tienes 1 cambio pendiente." : `Tienes ${pendingCount} cambios pendientes.`;
+    contentSaveButton.disabled = false;
+    return;
+  }
+
+  contentSaveBar.classList.remove("is-pending");
+  contentSaveStatus.textContent =
+    contentEditorState.message === "saved"
+      ? "Cambios guardados."
+      : "Edita cualquier texto y luego pulsa Guardar cambios.";
+  contentSaveButton.disabled = true;
+};
+
+const syncEditablePendingState = (element) => {
+  const key = element.dataset.editableKey;
+  const nextValue = getEditableResolvedValue(element);
+  const currentValue = state.content[key] ?? defaultContent[key];
+  const hasPendingChange = nextValue !== currentValue;
+
+  element.classList.toggle("has-pending-change", hasPendingChange);
+  updateContactLink(element, nextValue);
+
+  if (hasPendingChange) {
+    contentEditorState.pendingKeys.add(key);
+    contentEditorState.message = "pending";
+  } else {
+    contentEditorState.pendingKeys.delete(key);
+
+    if (contentEditorState.pendingKeys.size === 0 && contentEditorState.message !== "saved") {
+      contentEditorState.message = "idle";
+    }
+  }
+
+  updateContentSaveUi();
+};
+
+const discardPendingContentChanges = () => {
+  contentEditorState.pendingKeys.clear();
+  contentEditorState.message = "idle";
+  applyContentState();
+  updateContentSaveUi();
+};
+
+const savePendingContentChanges = () => {
+  if (contentEditorState.pendingKeys.size === 0) {
+    return;
+  }
+
+  editableElements.forEach((element) => {
+    const key = element.dataset.editableKey;
+    state.content[key] = getEditableResolvedValue(element);
+  });
+
+  saveContent();
+  contentEditorState.pendingKeys.clear();
+  contentEditorState.message = "saved";
+  applyContentState();
+  updateContentSaveUi();
 };
 
 const setEditableMode = (enabled) => {
@@ -1253,6 +1205,13 @@ const setEditableMode = (enabled) => {
     element.classList.remove("is-editable");
     element.removeAttribute("spellcheck");
   });
+
+  if (!enabled) {
+    discardPendingContentChanges();
+    return;
+  }
+
+  updateContentSaveUi();
 };
 
 const revealObserver =
@@ -2075,7 +2034,6 @@ const updateAccountUi = () => {
 const applyAuthUi = () => {
   const safeMode = authState.role === "partner" ? "login" : authState.mode;
   const isPartnerAuth = authState.role === "partner";
-  const isVerificationStage = authState.stage === "verification";
   const partnerCopy =
     safeMode === "login"
       ? "Entra como partner para editar textos, agregar ropa y actualizar el catálogo."
@@ -2087,44 +2045,28 @@ const applyAuthUi = () => {
 
   authState.mode = safeMode;
   authRoleLabel.textContent = `Cuenta ${roleLabel(authState.role)}`;
-
-  if (isVerificationStage) {
-    const verificationEmail = authState.pendingVerification?.email || authForm?.elements.email?.value || "tu correo";
-    authTitle.textContent = "Confirma tu codigo";
-    authCopy.textContent =
-      `Te enviamos un codigo de ${FIRST_LOGIN_CODE_LENGTH} digitos a ${verificationEmail}. Solo lo pedimos en el primer inicio de sesion.`;
-    authSubmit.textContent = "Confirmar codigo";
-  } else {
-    authTitle.textContent =
-      safeMode === "login"
-        ? `Iniciar sesión como ${roleLabel(authState.role)}`
-        : `Crear cuenta ${roleLabel(authState.role)}`;
-    authCopy.textContent = authState.role === "partner" ? partnerCopy : clientCopy;
-    authSubmit.textContent = safeMode === "login" ? "Iniciar sesión" : "Crear cuenta";
-  }
+  authTitle.textContent =
+    safeMode === "login"
+      ? `Iniciar sesión como ${roleLabel(authState.role)}`
+      : `Crear cuenta ${roleLabel(authState.role)}`;
+  authCopy.textContent = authState.role === "partner" ? partnerCopy : clientCopy;
+  authSubmit.textContent = safeMode === "login" ? "Iniciar sesión" : "Crear cuenta";
 
   authToggleMode.textContent = safeMode === "login" ? "Crear cuenta" : "Volver a iniciar sesión";
   authSwitchText.textContent = safeMode === "login" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?";
 
-  authNameField.hidden = safeMode === "login" || isVerificationStage;
-  authConfirmField.hidden = safeMode === "login" || isVerificationStage;
-  authCodeField.hidden = !isVerificationStage;
-  authCodeCopy.hidden = !isVerificationStage;
-  authResendCode.hidden = !isVerificationStage;
-  authToggleMode.hidden = isPartnerAuth || isVerificationStage;
-  authSwitchText.hidden = isPartnerAuth || isVerificationStage;
+  authNameField.hidden = safeMode === "login";
+  authConfirmField.hidden = safeMode === "login";
+  authToggleMode.hidden = isPartnerAuth;
+  authSwitchText.hidden = isPartnerAuth;
 
   if (authSwitchCopy) {
-    authSwitchCopy.hidden = isPartnerAuth || isVerificationStage;
+    authSwitchCopy.hidden = isPartnerAuth;
   }
 
-  authForm.elements.name.required = safeMode === "register" && !isVerificationStage;
-  authForm.elements.confirmPassword.required = safeMode === "register" && !isVerificationStage;
-  authForm.elements.verificationCode.required = isVerificationStage;
-  authForm.elements.password.autocomplete =
-    safeMode === "login" || isVerificationStage ? "current-password" : "new-password";
-  authForm.elements.email.readOnly = isVerificationStage;
-  authForm.elements.password.readOnly = isVerificationStage;
+  authForm.elements.name.required = safeMode === "register";
+  authForm.elements.confirmPassword.required = safeMode === "register";
+  authForm.elements.password.autocomplete = safeMode === "login" ? "current-password" : "new-password";
 };
 
 const setAuthMode = (mode) => {
@@ -2144,7 +2086,15 @@ const openAuthModal = (role) => {
 const attachEditableListeners = () => {
   editableElements.forEach((element) => {
     element.addEventListener("focus", () => {
-      element.dataset.previousValue = state.content[element.dataset.editableKey] ?? "";
+      element.dataset.previousValue = getEditableResolvedValue(element);
+    });
+
+    element.addEventListener("input", () => {
+      if (!isPartnerSession()) {
+        return;
+      }
+
+      syncEditablePendingState(element);
     });
 
     element.addEventListener("keydown", (event) => {
@@ -2160,7 +2110,7 @@ const attachEditableListeners = () => {
       if (event.key === "Escape") {
         event.preventDefault();
         element.textContent = element.dataset.previousValue || defaultContent[element.dataset.editableKey] || "";
-        updateContactLink(element, element.textContent);
+        syncEditablePendingState(element);
         element.blur();
       }
     });
@@ -2171,12 +2121,10 @@ const attachEditableListeners = () => {
       }
 
       const key = element.dataset.editableKey;
-      const value = getEditableValue(element) || defaultContent[key];
+      const value = getEditableResolvedValue(element);
 
-      state.content[key] = value;
       element.textContent = value;
-      updateContactLink(element, value);
-      saveContent();
+      syncEditablePendingState(element);
     });
 
     if (element.matches("a")) {
@@ -2191,6 +2139,19 @@ const attachEditableListeners = () => {
     }
   });
 };
+
+contentSaveButton?.addEventListener("click", () => {
+  savePendingContentChanges();
+});
+
+window.addEventListener("beforeunload", (event) => {
+  if (contentEditorState.pendingKeys.size === 0) {
+    return;
+  }
+
+  event.preventDefault();
+  event.returnValue = "";
+});
 
 if (menuToggle && siteNav) {
   menuToggle.addEventListener("click", () => {
@@ -2303,25 +2264,8 @@ authToggleMode?.addEventListener("click", () => {
   setAuthMode(authState.mode === "login" ? "register" : "login");
 });
 
-authResendCode?.addEventListener("click", async () => {
-  const accountId = authState.pendingVerification?.accountId;
-  const account = state.accounts.find((entry) => entry.id === accountId);
-
-  if (!account) {
-    authFeedback.textContent = "No encontramos la cuenta para reenviar el codigo.";
-    return;
-  }
-
-  await beginFirstLoginVerification(account);
-});
-
 authForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
-
-  if (authState.stage === "verification") {
-    verifyPendingFirstLoginCode();
-    return;
-  }
 
   const name = collapseSpaces(authForm.elements.name.value || "");
   const email = (authForm.elements.email.value || "").trim().toLowerCase();
@@ -2366,12 +2310,11 @@ authForm?.addEventListener("submit", async (event) => {
       password,
       role: authState.role,
       createdAt: new Date().toISOString(),
-      firstLoginVerifiedAt: "",
     };
 
     state.accounts.push(newAccount);
     saveAccounts();
-    await beginFirstLoginVerification(newAccount);
+    startSessionForAccount(newAccount);
     return;
   }
 
@@ -2389,11 +2332,6 @@ authForm?.addEventListener("submit", async (event) => {
 
   if (authState.role === "partner" && !isAuthorizedPartnerEmail(existingAccount.email)) {
     authFeedback.textContent = "Solo la cuenta partner autorizada puede entrar como socio.";
-    return;
-  }
-
-  if (requiresFirstLoginVerification(existingAccount)) {
-    await beginFirstLoginVerification(existingAccount);
     return;
   }
 
@@ -2735,7 +2673,6 @@ if (
     !state.session.email ||
     !findAccountByEmail(state.session.email || "") ||
     findAccountByEmail(state.session.email || "")?.role !== state.session.role ||
-    !findAccountByEmail(state.session.email || "")?.firstLoginVerifiedAt ||
     (state.session.role === "partner" && !isAuthorizedPartnerEmail(state.session.email || ""))
   )
 ) {
