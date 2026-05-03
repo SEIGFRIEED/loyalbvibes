@@ -124,7 +124,20 @@
       <div class="shell">
         <div class="hero-media" data-reveal>
           <div class="video-container">
-            <video src="assets/render_1.mp4" autoplay muted loop playsinline></video>
+            <video
+              src="assets/render_1.mp4"
+              autoplay
+              muted
+              loop
+              playsinline
+              webkit-playsinline
+              disablePictureInPicture
+              disableRemotePlayback
+              controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+              x-webkit-airplay="deny"
+              tabindex="-1"
+              aria-hidden="true"
+            ></video>
           </div>
         </div>
       </div>
@@ -261,6 +274,13 @@
     </div>
   </footer>
 
+  <div class="content-save-bar" id="content-save-bar" hidden>
+    <p class="content-save-status" id="content-save-status">
+      Edita cualquier texto y luego pulsa Guardar cambios.
+    </p>
+    <button class="partner-action" type="button" id="content-save-button" disabled>Guardar cambios</button>
+  </div>
+
   <div class="modal-backdrop" id="auth-modal" hidden>
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <button
@@ -297,29 +317,10 @@
           <input type="password" name="confirmPassword" autocomplete="new-password" minlength="4">
         </label>
 
-        <label class="auth-field" id="auth-code-field" hidden>
-          Codigo de verificacion
-          <input
-            type="text"
-            name="verificationCode"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            minlength="6"
-            maxlength="6"
-            pattern="[0-9]{6}"
-          >
-        </label>
-
         <button class="primary-button" type="submit" id="auth-submit">Iniciar sesión</button>
       </form>
 
       <p class="modal-feedback" id="auth-feedback" aria-live="polite"></p>
-      <p class="auth-helper" id="auth-code-copy" hidden>
-        Solo te pediremos este codigo una vez por cuenta, mientras no borres cookies o historial.
-      </p>
-      <button class="secondary-button auth-resend-button" type="button" id="auth-resend-code" hidden>
-        Reenviar codigo
-      </button>
       <p class="modal-switch" id="auth-switch-copy">
         <span id="auth-switch-text">¿No tienes cuenta?</span>
         <button class="text-button" type="button" id="auth-toggle-mode">Crear cuenta</button>
