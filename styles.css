@@ -2810,3 +2810,116 @@ body {
     border-radius: 0;
   }
 }
+/* =====================================================
+   MOBILE FIXES — pega esto al FINAL de tu style.css
+   ====================================================*/
+
+/* 1. VIEWPORT — evita que el zoom cause overflow horizontal */
+html {
+  overflow-x: hidden;
+}
+
+/* 2. CONTACT RAIL — la imagen "Loyalty" se salía del contenedor negro
+      porque minmax(280px, 1fr) forzaba más ancho del disponible en móvil */
+.contact-rail {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* 3. CONTACT TAG WRAP — la imagen debe quedarse DENTRO de la sección negra */
+.contact-tag-wrap {
+  width: 100%;
+  max-width: 260px;
+  height: 130px;
+  justify-self: start;
+  overflow: hidden;   /* asegura que la imagen no se desborde */
+}
+
+.contact-tag-horizontal {
+  width: 130px;
+  height: 260px;
+}
+
+/* 4. CONTACT SECTION — asegura que no haya overflow */
+.contact-section {
+  overflow: hidden;
+}
+
+/* 5. CONTACT GRID en móvil */
+.contact-grid {
+  grid-template-columns: 1fr;
+}
+
+/* 6. SHELL — en pantallas muy pequeñas el padding lateral era insuficiente */
+@media (max-width: 390px) {
+  :root {
+    --shell: calc(100vw - 24px);
+    --content: calc(100vw - 24px);
+  }
+}
+
+/* 7. HERO STAGE — el vídeo desbordaba en zoom out */
+.hero-stage {
+  overflow: hidden;
+}
+
+.video-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 8. NOTES GRID — los artículos con transform: translateY se salían en móvil */
+@media (max-width: 640px) {
+  .notes-grid article:nth-child(2) {
+    transform: none;
+  }
+
+  .contact-rail {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-tag-wrap {
+    width: 180px;
+    height: 100px;
+    max-width: 100%;
+  }
+
+  .contact-tag-horizontal {
+    width: 100px;
+    height: 180px;
+  }
+}
+
+/* 9. PRODUCT GRID — en zoom out a 1 columna en móvil pequeño */
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Evita que las cards del catálogo desborden */
+  .catalog-latest .product-card:first-child {
+    grid-column: auto;
+  }
+
+  /* Hero aside en columna única */
+  .hero-aside {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 10. GENERAL — imágenes nunca se salen de su contenedor */
+img,
+video {
+  max-width: 100%;
+}
+
+/* 11. TEXTO en el footer y contact que se cortaba */
+.footer-grid {
+  flex-wrap: wrap;
+}
+
+.contact-list a,
+.contact-list p {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
