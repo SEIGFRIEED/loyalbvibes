@@ -218,6 +218,9 @@ const authConfirmField = document.querySelector("#auth-confirm-field");
 const contentSaveBar = document.querySelector("#content-save-bar");
 const contentSaveStatus = document.querySelector("#content-save-status");
 const contentSaveButton = document.querySelector("#content-save-button");
+const partnerExportButton = document.querySelector("#partner-export-button");
+const partnerImportButton = document.querySelector("#partner-import-button");
+const partnerImportInput = document.querySelector("#partner-import-input");
 
 const productModal = document.querySelector("#product-modal");
 const productForm = document.querySelector("#product-form");
@@ -510,6 +513,26 @@ const readFileAsDataUrl = (file) =>
 
     reader.readAsDataURL(file);
   });
+const readFileAsText = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("empty_file_result"));
+    });
+
+    reader.addEventListener("error", () => {
+      reject(new Error("file_read_error"));
+    });
+
+    reader.readAsText(file);
+  });
+const isObjectRecord = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 const loadImageSource = (src) =>
   new Promise((resolve, reject) => {
@@ -1023,6 +1046,74 @@ const saveProducts = () => {
 
 const saveCart = () => {
   writeStorage(STORAGE_KEYS.cart, state.cart);
+};
+
+const buildPartnerSyncPayload = () => ({
+  schema: "lvf-partner-sync",
+  version: 1,
+  exportedAt: new Date().toISOString(),
+  content: state.content,
+  products: state.products,
+});
+
+const exportPartnerSync = () => {
+  if (!isPartnerSession()) {
+    return;
+  }
+
+  const payload = JSON.stringify(buildPartnerSyncPayload(), null, 2);
+  const blob = new Blob([payload], { type: "application/json" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+  link.href = url;
+  link.download = `lvf-cambios-${timestamp}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => {
+    window.URL.revokeObjectURL(url);
+  }, 1000);
+};
+
+const importPartnerSync = async (file) => {
+  if (!file || !isPartnerSession()) {
+    return;
+  }
+
+  const shouldReplaceSavedData = window.confirm(
+    "Esto reemplazará los textos y prendas guardados en este navegador por los del archivo. ¿Quieres continuar?"
+  );
+
+  if (!shouldReplaceSavedData) {
+    return;
+  }
+
+  const fileText = await readFileAsText(file);
+  const payload = JSON.parse(fileText);
+
+  if (!isObjectRecord(payload) || !Array.isArray(payload.products) || !isObjectRecord(payload.content)) {
+    throw new Error("invalid_partner_sync_file");
+  }
+
+  state.content = migrateLegacyContent({
+    ...state.content,
+    ...payload.content,
+  }).content;
+  state.products = normalizeProducts(payload.products);
+  state.cart = normalizeCart(state.cart, state.products);
+
+  saveContent();
+  saveProducts();
+  saveCart();
+
+  contentEditorState.pendingKeys.clear();
+  contentEditorState.message = "saved";
+
+  window.alert("Cambios importados correctamente. La página se recargará para mostrarlos.");
+  window.location.reload();
 };
 
 const getProductById = (productId) => state.products.find((product) => product.id === productId);
@@ -2168,6 +2259,37 @@ const attachEditableListeners = () => {
 
 contentSaveButton?.addEventListener("click", () => {
   savePendingContentChanges();
+});
+
+partnerExportButton?.addEventListener("click", () => {
+  exportPartnerSync();
+});
+
+partnerImportButton?.addEventListener("click", () => {
+  if (!isPartnerSession()) {
+    return;
+  }
+
+  partnerImportInput?.click();
+});
+
+partnerImportInput?.addEventListener("change", async (event) => {
+  const input = event.currentTarget;
+  const file = input instanceof HTMLInputElement ? input.files?.[0] : null;
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    await importPartnerSync(file);
+  } catch (error) {
+    window.alert("No se pudo importar ese archivo. Verifica que sea un respaldo valido de LOYALTYVIBESFOREVER.");
+  } finally {
+    if (input instanceof HTMLInputElement) {
+      input.value = "";
+    }
+  }
 });
 
 window.addEventListener("resize", () => {
