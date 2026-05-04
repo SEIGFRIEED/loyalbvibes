@@ -26,7 +26,7 @@ const db = getFirestore(app);
 
 // CLOUDINARY
 const CLOUD_NAME = "diglx1d8x";
-const UPLOAD_PRESET = "fotosienda";
+const UPLOAD_PRESET = "fotostienda";
 
 async function subirImagenCloudinary(file) {
   const data = new FormData();
