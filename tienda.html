@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Tienda | LOYALTYVIBESFOREVER</title>
   <meta
     name="description"
@@ -14,7 +14,7 @@
     href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet"
   >
-  <link rel="stylesheet" href="styles.css?v=20260503b">
+  <link rel="stylesheet" href="styles.css?v=20260503d">
 </head>
 <body>
   <div class="topbar">
@@ -139,12 +139,18 @@
             <h3>Administra cada categoría desde esta página.</h3>
             <p>
               Puedes agregar, editar o quitar prendas dentro de T-shirts, Hoodies,
-              Pantalones y Accesorios sin tocar la portada.
+              Pantalones y Accesorios, y también exportar o importar cambios para pasarlos
+              entre dispositivos.
             </p>
           </div>
-          <button class="partner-action" type="button" data-open-product-modal data-default-category="tshirts">
-            Añadir prenda
-          </button>
+          <div class="partner-toolbar-actions">
+            <button class="partner-action" type="button" data-open-product-modal data-default-category="tshirts">
+              Añadir prenda
+            </button>
+            <button class="secondary-button" type="button" id="partner-export-button">Exportar cambios</button>
+            <button class="secondary-button" type="button" id="partner-import-button">Importar cambios</button>
+            <input type="file" id="partner-import-input" accept=".json,application/json" hidden>
+          </div>
         </div>
 
         <div class="product-grid" id="product-grid"></div>
@@ -523,7 +529,7 @@
 
             <div class="product-form-actions">
               <button class="primary-button" type="submit">Agregar artículo</button>
-              <button class="secondary-button" type="button" id="quick-view-checkout">Ir a pagar</button>
+              <button class="secondary-button" type="button" id="quick-view-checkout">Pagar con PayPal</button>
             </div>
           </form>
 
@@ -545,9 +551,9 @@
       </button>
 
       <p class="section-tag">Checkout</p>
-      <h2 id="checkout-title">Finalizar compra</h2>
+      <h2 id="checkout-title">Finalizar con PayPal</h2>
       <p class="modal-copy">
-        Revisa tu bolsa, completa la dirección de entrega y deja listo el pago.
+        Revisa tu bolsa, completa la dirección de entrega y continúa con el pago por PayPal.
       </p>
 
       <div class="checkout-layout">
@@ -611,36 +617,17 @@
               <input type="text" name="postalCode" autocomplete="postal-code" required>
             </label>
 
-            <label class="auth-field">
-              Nombre en la tarjeta
-              <input type="text" name="cardName" autocomplete="cc-name" required>
-            </label>
-
-            <label class="auth-field checkout-field-span">
-              Número de tarjeta
-              <input
-                type="text"
-                name="cardNumber"
-                inputmode="numeric"
-                autocomplete="cc-number"
-                placeholder="1234 5678 9012 3456"
-                required
-              >
-            </label>
-
-            <label class="auth-field">
-              Vencimiento
-              <input type="text" name="expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" required>
-            </label>
-
-            <label class="auth-field">
-              CVV
-              <input type="text" name="cvv" inputmode="numeric" autocomplete="cc-csc" placeholder="123" required>
-            </label>
+            <div class="checkout-paypal-note checkout-field-span">
+              <strong>Pago exclusivo con PayPal</strong>
+              <p>
+                Después de confirmar tus datos de entrega, este pedido queda marcado para cobrarse
+                únicamente por PayPal.
+              </p>
+            </div>
           </div>
 
           <div class="product-form-actions">
-            <button class="primary-button" type="submit" id="checkout-submit">Pagar pedido</button>
+            <button class="primary-button" type="submit" id="checkout-submit">Pagar con PayPal</button>
           </div>
         </form>
       </div>
@@ -649,6 +636,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=20260503b"></script>
+  <script src="script.js?v=20260503d"></script>
 </body>
 </html>
