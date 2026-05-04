@@ -1395,6 +1395,7 @@ const revealObserver =
     : null;
 
 const observeRevealTargets = (scope = document) => {
+  document.body?.classList.add("has-reveal-effects");
   const targets = scope.querySelectorAll("[data-reveal]");
 
   targets.forEach((item) => {
@@ -2896,13 +2897,20 @@ updateAccountUi();
 syncCatalogViewFromHash({ scroll: Boolean(window.location.hash), fallbackToAll: true });
 
 // ✅ ESCUCHA FIRESTORE EN TIEMPO REAL — activo desde que carga la página
-onSnapshot(collection(db, "productos"), (snapshot) => {
-  const productosFirebase = snapshot.docs.map((document) => ({
-    id: document.id,
-    ...document.data()
-  }));
+onSnapshot(
+  collection(db, "productos"),
+  (snapshot) => {
+    const productosFirebase = snapshot.docs.map((document) => ({
+      id: document.id,
+      ...document.data(),
+    }));
 
-  state.products = normalizeProducts(productosFirebase);
-  saveProducts();
-  renderProducts();
-});
+    state.products = normalizeProducts(productosFirebase);
+    saveProducts();
+    renderProducts();
+  },
+  (error) => {
+    console.error("Error leyendo productos de Firebase:", error);
+    renderProducts();
+  }
+);
