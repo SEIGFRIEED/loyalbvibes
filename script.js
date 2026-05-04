@@ -1,3 +1,64 @@
+// 🔥 FIREBASE + CLOUDINARY
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+  deleteDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAoGE4F4aqc97lOLVI169vgC9tJQ0rcK9Q",
+  authDomain: "loyal-9eea6.firebaseapp.com",
+  projectId: "loyal-9eea6",
+  storageBucket: "loyal-9eea6.firebasestorage.app",
+  messagingSenderId: "169561925264",
+  appId: "1:169561925264:web:f200ff76f12cdcb5dbda15"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// CLOUDINARY
+const CLOUD_NAME = "diglx1d8x";
+const UPLOAD_PRESET = "fotosienda";
+
+async function subirImagenCloudinary(file) {
+  const data = new FormData();
+  data.append("file", file);
+  data.append("upload_preset", UPLOAD_PRESET);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method: "POST",
+    body: data
+  });
+
+  const img = await res.json();
+
+  if (!img.secure_url) {
+    throw new Error("Error subiendo imagen a Cloudinary");
+  }
+
+  return img.secure_url;
+}
+
+async function guardarProductoEnFirebase(producto) {
+  const { id, ...datos } = producto;
+  await setDoc(doc(db, "productos", id), {
+    ...datos,
+    updatedAt: serverTimestamp()
+  });
+}
+
+async function eliminarProductoDeFirebase(productId) {
+  await deleteDoc(doc(db, "productos", productId));
+}
+
 const STORAGE_KEYS = {
   accounts: "nival-accounts",
   session: "nival-session",
@@ -22,7 +83,6 @@ const PRODUCT_IMAGE_MAX_DIMENSION = 1600;
 const PRODUCT_IMAGE_JPEG_QUALITY = 0.86;
 const CHECKOUT_SHIPPING_FEE = 479.59;
 const DEFAULT_PRODUCT_STOCK = 12;
-// Tasa de venta del BCRD del 1 de mayo de 2026 para migrar precios legacy en USD a DOP.
 const LEGACY_USD_TO_DOP_RATE = 59.9485;
 const LEGACY_MOCKUP_PRODUCT_IDS = new Set([
   "product-1",
@@ -600,41 +660,11 @@ const setProductImageValue = (side, value = "") => {
   }
 };
 
-const resetProductImageState = ({ frontImage = "", backImage = "" } = {}) => {
-  productImageTaskTokens.front = null;
-  productImageTaskTokens.back = null;
-  pendingProductImageUpdates.front = null;
-  pendingProductImageUpdates.back = null;
-
-  setProductImageValue("front", frontImage);
-  setProductImageValue("back", backImage);
-
-  if (productFrontImageInput) {
-    productFrontImageInput.value = "";
-  }
-
-  if (productBackImageInput) {
-    productBackImageInput.value = "";
-  }
-};
-
 const processProductImageInput = (side) => {
   const input = side === "front" ? productFrontImageInput : productBackImageInput;
-
-  if (!input) {
-    return Promise.resolve("");
-  }
-
-  const [file] = input.files || [];
+  const file = input?.files?.[0];
 
   if (!file) {
-    return Promise.resolve("");
-  }
-
-  if (!file.type.startsWith("image/")) {
-    productImageTaskTokens[side] = null;
-    input.value = "";
-    productFeedback.textContent = "Sube un archivo de imagen valido para la foto frontal o trasera.";
     return Promise.resolve("");
   }
 
@@ -671,6 +701,17 @@ const processProductImageInput = (side) => {
   productImageTaskTokens[side] = taskToken;
   pendingProductImageUpdates[side] = task;
   return task;
+};
+
+const resetProductImageState = ({ frontImage = "", backImage = "" } = {}) => {
+  if (productFrontImageInput) productFrontImageInput.value = "";
+  if (productBackImageInput) productBackImageInput.value = "";
+  setProductImageValue("front", frontImage);
+  setProductImageValue("back", backImage);
+  pendingProductImageUpdates.front = null;
+  pendingProductImageUpdates.back = null;
+  productImageTaskTokens.front = null;
+  productImageTaskTokens.back = null;
 };
 
 const getEditableValue = (element) => {
@@ -1102,7 +1143,9 @@ const importPartnerSync = async (file) => {
     ...state.content,
     ...payload.content,
   }).content;
-  state.products = normalizeProducts(payload.products);
+
+  const importedProducts = normalizeProducts(payload.products);
+  state.products = importedProducts;
   state.cart = normalizeCart(state.cart, state.products);
 
   saveContent();
@@ -1613,7 +1656,7 @@ const renderCheckout = () => {
 
   if (checkoutFeedback) {
     checkoutFeedback.textContent =
-      entries.length === 0 ? "Tu bolsa está vacía. Agrega un artículo para completar el pago." : stockIssue;
+      entries.length === 0 ? "Tu bolsa está vacía. Agrega un artículo para continuar con PayPal." : stockIssue;
   }
 
   if (checkoutSubmit) {
@@ -1792,7 +1835,7 @@ const openCheckout = () => {
   prefillCheckoutForm();
 
   if (checkoutFeedback && state.cart.length === 0) {
-    checkoutFeedback.textContent = "Tu bolsa está vacía. Agrega un artículo para completar el pago.";
+    checkoutFeedback.textContent = "Tu bolsa está vacía. Agrega un artículo para continuar con PayPal.";
   }
 
   openModal(checkoutModal);
@@ -2512,7 +2555,7 @@ checkoutForm?.addEventListener("submit", (event) => {
   const entries = getCartEntries();
 
   if (entries.length === 0) {
-    checkoutFeedback.textContent = "Agrega al menos un artículo antes de confirmar el pago.";
+    checkoutFeedback.textContent = "Agrega al menos un artículo antes de continuar con PayPal.";
     return;
   }
 
@@ -2530,10 +2573,6 @@ checkoutForm?.addEventListener("submit", (event) => {
   const address = collapseSpaces(checkoutForm.elements.address.value || "");
   const city = collapseSpaces(checkoutForm.elements.city.value || "");
   const postalCode = collapseSpaces(checkoutForm.elements.postalCode.value || "");
-  const cardName = collapseSpaces(checkoutForm.elements.cardName.value || "");
-  const cardNumber = (checkoutForm.elements.cardNumber.value || "").replace(/\D/g, "");
-  const expiry = collapseSpaces(checkoutForm.elements.expiry.value || "");
-  const cvv = (checkoutForm.elements.cvv.value || "").replace(/\D/g, "");
 
   if (
     !fullName ||
@@ -2541,14 +2580,10 @@ checkoutForm?.addEventListener("submit", (event) => {
     !phone ||
     !address ||
     !city ||
-    !postalCode ||
-    !cardName ||
-    cardNumber.length < 12 ||
-    !/^\d{2}\/\d{2}$/.test(expiry) ||
-    cvv.length < 3
+    !postalCode
   ) {
     checkoutFeedback.textContent =
-      "Completa nombre, dirección y datos de pago válidos para procesar el pedido.";
+      "Completa nombre, contacto y dirección de entrega para continuar con PayPal.";
     return;
   }
 
@@ -2579,7 +2614,7 @@ checkoutForm?.addEventListener("submit", (event) => {
   checkoutForm.reset();
   prefillCheckoutForm();
   checkoutFeedback.textContent =
-    `Pago registrado. Pedido ${orderReference} listo para ${fullName} en ${city}.`;
+    `Pedido ${orderReference} confirmado para ${fullName} en ${city}. Checkout marcado para pago por PayPal.`;
 });
 
 productForm?.elements.category?.addEventListener("change", () => {
@@ -2600,19 +2635,13 @@ productResetButton?.addEventListener("click", () => {
   productForm.elements.name.focus();
 });
 
+// ✅ FORMULARIO DE PRODUCTO — guarda en Cloudinary + Firebase
 productForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!isPartnerSession()) {
     closeModal(productModal);
     return;
-  }
-
-  const pendingUpdates = Object.values(pendingProductImageUpdates).filter(Boolean);
-
-  if (pendingUpdates.length > 0) {
-    productFeedback.textContent = "Estamos preparando las fotos de la prenda...";
-    await Promise.allSettled(pendingUpdates);
   }
 
   const productId = productForm.elements.productId.value;
@@ -2625,8 +2654,6 @@ productForm?.addEventListener("submit", async (event) => {
   const stock = normalizeStockValue(productForm.elements.stock.value, DEFAULT_PRODUCT_STOCK);
   const rawLabel = collapseSpaces(productForm.elements.label.value || "");
   const label = rawLabel || productVisuals[visual].defaultLabel;
-  const frontImage = productFrontImageDataInput?.value || "";
-  const backImage = productBackImageDataInput?.value || "";
   const existingProduct = state.products.find((product) => product.id === productId);
 
   if (!name || !price) {
@@ -2634,32 +2661,54 @@ productForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  const payload = {
-    id: productId || createId("product"),
-    name,
-    price,
-    stock,
-    label,
-    category,
-    visual,
-    frontImage,
-    backImage,
-    createdAt: existingProduct?.createdAt || new Date().toISOString(),
-  };
+  productFeedback.textContent = "Guardando prenda...";
+  productSubmit.disabled = true;
 
-  const existingIndex = state.products.findIndex((product) => product.id === payload.id);
+  try {
+    // Sube imágenes a Cloudinary solo si hay archivos nuevos seleccionados
+    let frontImage = existingProduct?.frontImage || "";
+    let backImage = existingProduct?.backImage || "";
 
-  if (existingIndex >= 0) {
-    state.products[existingIndex] = payload;
-  } else {
-    state.products.unshift(payload);
+    const frontFile = productFrontImageInput?.files?.[0];
+    const backFile = productBackImageInput?.files?.[0];
+
+    if (frontFile) {
+      productFeedback.textContent = "Subiendo imagen frontal...";
+      frontImage = await subirImagenCloudinary(frontFile);
+    }
+
+    if (backFile) {
+      productFeedback.textContent = "Subiendo imagen trasera...";
+      backImage = await subirImagenCloudinary(backFile);
+    }
+
+    const payload = {
+      id: productId || createId("product"),
+      name,
+      price,
+      stock,
+      label,
+      category,
+      visual,
+      frontImage,
+      backImage,
+      createdAt: existingProduct?.createdAt || new Date().toISOString(),
+    };
+
+    // Guarda en Firestore — onSnapshot actualizará la UI automáticamente
+    await guardarProductoEnFirebase(payload);
+
+    productFeedback.textContent =
+      existingProduct ? "Prenda actualizada." : "Prenda agregada al catálogo.";
+
+    openProductEditor(payload.id, payload.category);
+
+  } catch (error) {
+    console.error("Error guardando prenda:", error);
+    productFeedback.textContent = "Hubo un error guardando la prenda. Intenta de nuevo.";
+  } finally {
+    productSubmit.disabled = false;
   }
-
-  saveProducts();
-  renderProducts();
-  openProductEditor(payload.id, payload.category);
-  productFeedback.textContent =
-    existingIndex >= 0 ? "Prenda actualizada." : "Prenda agregada al catálogo.";
 });
 
 modalBackdrops.forEach((modal) => {
@@ -2720,6 +2769,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  // ✅ ELIMINAR PRODUCTO — borra de Firestore, onSnapshot limpia la UI
   if (deleteButton && isPartnerSession()) {
     const productId = deleteButton.dataset.productDelete;
     const product = state.products.find((item) => item.id === productId);
@@ -2734,11 +2784,15 @@ document.addEventListener("click", (event) => {
       return;
     }
 
-    state.products = state.products.filter((item) => item.id !== productId);
+    eliminarProductoDeFirebase(productId).catch((error) => {
+      console.error("Error eliminando producto de Firebase:", error);
+      window.alert("No se pudo eliminar la prenda del servidor. Intenta de nuevo.");
+    });
+
+    // El carrito se limpia localmente de inmediato
     state.cart = state.cart.filter((item) => item.productId !== productId);
-    saveProducts();
     saveCart();
-    renderProducts();
+    renderCheckout();
     return;
   }
 
@@ -2840,3 +2894,15 @@ resetProductForm();
 observeRevealTargets();
 updateAccountUi();
 syncCatalogViewFromHash({ scroll: Boolean(window.location.hash), fallbackToAll: true });
+
+// ✅ ESCUCHA FIRESTORE EN TIEMPO REAL — activo desde que carga la página
+onSnapshot(collection(db, "productos"), (snapshot) => {
+  const productosFirebase = snapshot.docs.map((document) => ({
+    id: document.id,
+    ...document.data()
+  }));
+
+  state.products = normalizeProducts(productosFirebase);
+  saveProducts();
+  renderProducts();
+});
